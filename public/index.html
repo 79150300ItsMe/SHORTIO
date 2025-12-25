@@ -1,0 +1,344 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Short.io Web Generator</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: #f4f6f8;
+            color: #333;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+        }
+
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 800px;
+        }
+
+        h1 {
+            text-align: center;
+            margin-bottom: 20px;
+            color: #2c3e50;
+        }
+
+        .tabs {
+            display: flex;
+            margin-bottom: 20px;
+            border-bottom: 2px solid #eee;
+        }
+
+        .tab {
+            padding: 10px 20px;
+            cursor: pointer;
+            font-weight: 600;
+            color: #666;
+        }
+
+        .tab.active {
+            color: #007bff;
+            border-bottom: 2px solid #007bff;
+            margin-bottom: -2px;
+        }
+
+        .content {
+            display: none;
+        }
+
+        .content.active {
+            display: block;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 500;
+        }
+
+        input[type="text"],
+        textarea {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            box-sizing: border-box;
+            font-family: monospace;
+        }
+
+        textarea {
+            height: 150px;
+            resize: vertical;
+        }
+
+        button {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            width: 100%;
+        }
+
+        button:hover {
+            background-color: #0056b3;
+        }
+
+        button:disabled {
+            background-color: #ccc;
+            cursor: not-allowed;
+        }
+
+        .result {
+            margin-top: 20px;
+            padding: 15px;
+            background: #f8f9fa;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            white-space: pre-wrap;
+            word-break: break-all;
+            display: none;
+        }
+
+        .result.error {
+            background: #fff3f3;
+            border-color: #ffcdd2;
+            color: #d32f2f;
+        }
+
+        .note {
+            font-size: 0.85em;
+            color: #666;
+            margin-top: 5px;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="container">
+        <h1>Short.io Link Generator</h1>
+
+        <div class="form-group">
+            <label>Path Format</label>
+            <div style="display: flex; gap: 20px;">
+                <label style="font-weight: normal; display: flex; align-items: center; gap: 5px;">
+                    <input type="radio" name="pathFormat" value="v7id" checked> v7id= (Default)
+                </label>
+                <label style="font-weight: normal; display: flex; align-items: center; gap: 5px;">
+                    <input type="radio" name="pathFormat" value="vid"> v/id= (9 chars mixed)
+                </label>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label for="domainSelect">Select Domain</label>
+            <select id="domainSelect"
+                style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px; background: white;">
+                <option value="govidey.site">govidey.site</option>
+                <option value="govldey.site">govldey.site</option>
+                <option value="vidby.it">vidby.it</option>
+            </select>
+        </div>
+
+        <div class="tabs">
+            <div class="tab active" onclick="switchTab('single')">Single Link</div>
+            <div class="tab" onclick="switchTab('bulk')">Bulk Links</div>
+        </div>
+
+        <!-- Single Link Form -->
+        <div id="single" class="content active">
+            <div class="form-group">
+                <label for="singleUrl">Original URL</label>
+                <input type="text" id="singleUrl" placeholder="https://example.com/my-long-page">
+            </div>
+            <div class="form-group">
+                <label for="singleSlug">Custom Slug (Optional)</label>
+                <input type="text" id="singleSlug" placeholder="my-custom-slug">
+                <div class="note">If no special chars, 'v7id=' will be prefixed automatically.</div>
+            </div>
+            <button onclick="generateSingle()" id="btnSingle">Generate Short Link</button>
+            <div id="resultSingle" class="result"></div>
+        </div>
+
+        <!-- Bulk Link Form -->
+        <div id="bulk" class="content">
+            <div class="form-group">
+                <label for="bulkUrls">Original URLs (One per line)</label>
+                <textarea id="bulkUrls" placeholder="https://site1.com&#10;https://site2.com"></textarea>
+            </div>
+            <button onclick="generateBulk()" id="btnBulk">Generate Bulk Links</button>
+            <div id="resultBulk" class="result"></div>
+        </div>
+    </div>
+
+    <script>
+        function switchTab(tabName) {
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.content').forEach(c => c.classList.remove('active'));
+
+            event.target.classList.add('active');
+            document.getElementById(tabName).classList.add('active');
+        }
+
+        async function generateSingle() {
+            const url = document.getElementById('singleUrl').value.trim();
+            const slug = document.getElementById('singleSlug').value.trim();
+            const domain = document.getElementById('domainSelect').value;
+            const format = document.querySelector('input[name="pathFormat"]:checked').value;
+            const btn = document.getElementById('btnSingle');
+            const resultDiv = document.getElementById('resultSingle');
+
+            if (!url) {
+                alert('Please enter a URL');
+                return;
+            }
+
+            btn.disabled = true;
+            btn.innerText = 'Generating...';
+            resultDiv.style.display = 'none';
+            resultDiv.className = 'result';
+
+            try {
+                const response = await fetch('/api/create-single', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        originalURL: url,
+                        customSlug: slug || undefined,
+                        domain: domain,
+                        format: format
+                    })
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    resultDiv.innerHTML = `
+                    <div style="display: flex; align-items: center; gap: 10px;">
+                        <strong>Short URL:</strong> 
+                        <a href="${data.shortURL}" target="_blank" id="shortUrlSingle">${data.shortURL}</a>
+                        <button onclick="copyToClipboard('${data.shortURL}')" style="width: auto; padding: 5px 10px; font-size: 14px;">Copy</button>
+                    </div>
+                    <small>Original: ${data.originalURL}</small>
+                `;
+                    resultDiv.style.display = 'block';
+                } else {
+                    resultDiv.innerText = `Error: ${data.error || 'Unknown error'}`;
+                    resultDiv.className = 'result error';
+                    resultDiv.style.display = 'block';
+                }
+            } catch (err) {
+                resultDiv.innerText = `Error: ${err.message}`;
+                resultDiv.className = 'result error';
+                resultDiv.style.display = 'block';
+            } finally {
+                btn.disabled = false;
+                btn.innerText = 'Generate Short Link';
+            }
+        }
+
+        async function generateBulk() {
+            const urlsText = document.getElementById('bulkUrls').value.trim();
+            const domain = document.getElementById('domainSelect').value;
+            const format = document.querySelector('input[name="pathFormat"]:checked').value;
+            const btn = document.getElementById('btnBulk');
+            const resultDiv = document.getElementById('resultBulk');
+
+            if (!urlsText) {
+                alert('Please enter at least one URL');
+                return;
+            }
+
+            const originals = urlsText.split('\n').map(u => u.trim()).filter(u => u);
+
+            btn.disabled = true;
+            btn.innerText = 'Generating...';
+            resultDiv.style.display = 'none';
+            resultDiv.className = 'result';
+
+            try {
+                const response = await fetch('/api/create-bulk', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        originals,
+                        domain: domain,
+                        format: format
+                    })
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    let html = '<h3>Results</h3>';
+
+                    // Add Copy All button if there are successful results
+                    const successfulLinks = data.results.filter(item => item.status === 'success');
+                    if (successfulLinks.length > 0) {
+                        const allLinksText = successfulLinks.map(item => item.shortURL).join('\\n');
+                        html += `<button onclick="copyToClipboard('${allLinksText}')" style="margin-bottom: 15px; background-color: #28a745;">Copy All Short Links</button>`;
+                    }
+
+                    html += '<ul style="list-style: none; padding: 0;">';
+                    data.results.forEach(item => {
+                        if (item.status === 'success') {
+                            html += `
+                            <li style="margin-bottom: 10px; display: flex; align-items: center; gap: 10px;">
+                                ✅ <a href="${item.shortURL}" target="_blank">${item.shortURL}</a> 
+                                <button onclick="copyToClipboard('${item.shortURL}')" style="width: auto; padding: 2px 8px; font-size: 12px;">Copy</button>
+                                <span style="color: #666; font-size: 0.9em;">(${item.originalURL})</span>
+                            </li>`;
+                        } else {
+                            html += `<li>❌ Failed (${item.originalURL}): ${JSON.stringify(item.error)}</li>`;
+                        }
+                    });
+                    html += '</ul>';
+                    resultDiv.innerHTML = html;
+                    resultDiv.style.display = 'block';
+                } else {
+                    resultDiv.innerText = `Error: ${data.error || 'Unknown error'}`;
+                    resultDiv.className = 'result error';
+                    resultDiv.style.display = 'block';
+                }
+            } catch (err) {
+                resultDiv.innerText = `Error: ${err.message}`;
+                resultDiv.className = 'result error';
+                resultDiv.style.display = 'block';
+            } finally {
+                btn.disabled = false;
+                btn.innerText = 'Generate Bulk Links';
+            }
+        }
+
+        function copyToClipboard(text) {
+            navigator.clipboard.writeText(text).then(() => {
+                alert('Copied: ' + text);
+            }).catch(err => {
+                console.error('Failed to copy: ', err);
+                alert('Failed to copy');
+            });
+        }
+    </script>
+
+</body>
+
+</html>
