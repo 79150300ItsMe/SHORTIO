@@ -42,6 +42,8 @@ app.post('/api/create-single', async (req, res) => {
         apiKey = process.env.SHORTIO_API_KEY_GOVLDEY;
     } else if (domain === 'vidby.it') {
         apiKey = process.env.SHORTIO_API_KEY_VIDBY;
+    } else if (domain === 'videco.me') {
+        apiKey = process.env.SHORTIO_API_KEY_VIDECO;
     }
 
     console.log('API create-single called');
@@ -50,7 +52,7 @@ app.post('/api/create-single', async (req, res) => {
     console.log('Selected Domain:', domain);
 
     if (!apiKey || !domain) {
-        return res.status(400).json({ error: 'Invalid or missing domain. Supported domains: govidey.site, govldey.site, vidby.it' });
+        return res.status(400).json({ error: 'Invalid or missing domain. Supported domains: govidey.site, govldey.site, vidby.it, videco.me' });
     }
 
     if (!originalURL) {
@@ -141,10 +143,12 @@ app.post('/api/create-bulk', async (req, res) => {
         apiKey = process.env.SHORTIO_API_KEY_GOVLDEY;
     } else if (domain === 'vidby.it') {
         apiKey = process.env.SHORTIO_API_KEY_VIDBY;
+    } else if (domain === 'videco.me') {
+        apiKey = process.env.SHORTIO_API_KEY_VIDECO;
     }
 
     if (!apiKey || !domain) {
-        return res.status(400).json({ error: 'Invalid or missing domain. Supported domains: govidey.site, govldey.site' });
+        return res.status(400).json({ error: 'Invalid or missing domain. Supported domains: govidey.site, govldey.site, vidby.it, videco.me' });
     }
 
     if (!originals || !Array.isArray(originals)) {
