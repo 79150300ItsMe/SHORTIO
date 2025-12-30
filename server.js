@@ -68,8 +68,8 @@ app.post('/api/create-single', async (req, res) => {
             const randomId = generateRandomString(9);
             path = `v/id=${randomId}`;
         } else {
-            // Default: v7id= (6 chars lowercase)
-            const randomId = Math.random().toString(36).substring(2, 8);
+            // Default: v7id= (7 chars mixed)
+            const randomId = generateRandomString(7);
             path = `v7id=${randomId}`;
         }
     }
@@ -167,7 +167,7 @@ app.post('/api/create-bulk', async (req, res) => {
             const randomId = generateRandomString(9);
             path = `v/id=${randomId}`;
         } else {
-            const randomId = Math.random().toString(36).substring(2, 8);
+            const randomId = generateRandomString(7);
             path = `v7id=${randomId}`;
         }
 
@@ -197,7 +197,7 @@ app.post('/api/create-bulk', async (req, res) => {
                     const retryId = generateRandomString(9);
                     retryPath = `v/id=${retryId}`;
                 } else {
-                    const retryId = Math.random().toString(36).substring(2, 8);
+                    const retryId = generateRandomString(7);
                     retryPath = `v7id=${retryId}`;
                 }
                 try {
