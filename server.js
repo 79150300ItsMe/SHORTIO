@@ -204,7 +204,7 @@ app.post('/api/create-bulk', async (req, res) => {
                     retryPath = `v/id=${retryId}`;
                 } else if (format === 'vqid') {
                     const retryId = generateRandomString(8);
-                    retryPath = `v/?id=${retryId}`;
+                    retryPath = `v/id=${retryId}`;
                 } else {
                     const retryId = generateRandomString(7);
                     retryPath = `v7id=${retryId}`;
