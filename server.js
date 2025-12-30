@@ -67,9 +67,9 @@ app.post('/api/create-single', async (req, res) => {
         if (format === 'vid') {
             const randomId = generateRandomString(9);
             path = `v/id=${randomId}`;
-        } else if (format === 'vqid') {
+        } else if (format === 'e7id') {
             const randomId = generateRandomString(8);
-            path = `v/?id=${randomId}`;
+            path = `e7/id=${randomId}`;
         } else {
             // Default: v7id= (7 chars mixed)
             const randomId = generateRandomString(7);
@@ -169,9 +169,9 @@ app.post('/api/create-bulk', async (req, res) => {
         if (format === 'vid') {
             const randomId = generateRandomString(9);
             path = `v/id=${randomId}`;
-        } else if (format === 'vqid') {
+        } else if (format === 'e7id') {
             const randomId = generateRandomString(8);
-            path = `v/?id=${randomId}`;
+            path = `e7/id=${randomId}`;
         } else {
             const randomId = generateRandomString(7);
             path = `v7id=${randomId}`;
@@ -202,9 +202,9 @@ app.post('/api/create-bulk', async (req, res) => {
                 if (format === 'vid') {
                     const retryId = generateRandomString(9);
                     retryPath = `v/id=${retryId}`;
-                } else if (format === 'vqid') {
+                } else if (format === 'e7id') {
                     const retryId = generateRandomString(8);
-                    retryPath = `v/id=${retryId}`;
+                    retryPath = `e7/id=${retryId}`;
                 } else {
                     const retryId = generateRandomString(7);
                     retryPath = `v7id=${retryId}`;
